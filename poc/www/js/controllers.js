@@ -1,41 +1,45 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope) {})
-
-.controller('ChatsCtrl', function($scope, Chats) {
-  $scope.chats = Chats.all();
-  $scope.remove = function(chat) {
-    Chats.remove(chat);
-  }
-})
-
-.controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-  $scope.chat = Chats.get($stateParams.chatId);
-})
-
-.controller('FriendsCtrl', function($scope, Friends) {
-  $scope.friends = Friends.all();
-})
-
-.controller('FriendDetailCtrl', function($scope, $stateParams, Friends) {
-  $scope.friend = Friends.get($stateParams.friendId);
-})
-
-.controller("PlayController", function($scope, $cordovaMedia, $ionicLoading) {
- 
+.controller('RadioCtrl', function($scope,$cordovaMedia, $ionicLoading) {
+    
+    var media;
+    
+    $scope.data = { 'volume' : '50' };
+    
     $scope.play = function(src) {
-        var media = new Media(src, null, null, mediaStatusCallback);
+        media = new Media(src, null, null, mediaStatusCallback);
         $cordovaMedia.play(media);
+        mediaPlayer.setVolume(0.2);
+    }
+    
+    $scope.setVolume = function(volume) {
+        mediaPlayer.setVolume(1/volume);
     }
  
-    var mediaStatusCallback = function(status) {
-        if(status == 1) {
-            $ionicLoading.show({template: 'Loading...'});
-        } else {
-            $ionicLoading.hide();
+    var timeoutId = null;
+    
+    $scope.$watch('data.volume', function() {
+        
+        
+        console.log('Has changed');
+        
+        if(timeoutId !== null) {
+            console.log('Ignoring this movement');
+            return;
         }
-    }
- 
+        
+        console.log('Not going to ignore this one');
+        timeoutId = $timeout( function() {
+            
+            console.log('It changed recently!');
+            
+            $timeout.cancel(timeoutId);
+            timeoutId = null;
+            
+            mediaPlayer.setVolume(1/$scope.data.volume);
+        }, 1000); 
+        
+    })
 })
 
 .controller('AccountCtrl', function($scope) {
